@@ -1,0 +1,7 @@
+{
+  "declarations": 1179,
+  "allowedAxioms": ["propext", "Classical.choice", "Quot.sound"],
+  "command": "lake env lean -DwarningAsError=true KomlosAudit.lean",
+  "ranAt": "2026-10-13",
+  "note": "lake build succeeded (3842 jobs); audit reported 1179 theorem declarations with only permitted axioms"
+}

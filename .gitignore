@@ -1,0 +1,6 @@
+.lake/
+.venv/
+.DS_Store
+*.olean
+*.trace
+__pycache__/
