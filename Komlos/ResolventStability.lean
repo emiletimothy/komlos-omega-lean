@@ -84,7 +84,8 @@ theorem eq_resolventVector {s : ℕ} {b : ℝ} {M : Input s s} {v : Fin s → �
   calc v = (slackMatrix b M)⁻¹ *ᵥ (slackMatrix b M *ᵥ v) := by
         rw [Matrix.mulVec_mulVec, Matrix.nonsing_inv_mul _ hunit,
           Matrix.one_mulVec]
-    _ = resolventVector b M := by rw [e]
+    _ = resolventVector b M :=
+      congrArg (fun w => (slackMatrix b M)⁻¹ *ᵥ w) e
 
 /-- The difference of the two resolvent solutions is the moved resolvent
 applied to the deposit error: `Ax·(vx − v₀) = (Mx − M₀)·v₀`. -/
@@ -132,7 +133,7 @@ theorem resolvent_vector_stability_correction {s : ℕ} {b ε : ℝ}
     (hpos : (slackMatrix b Mx).PosDef)
     (hv₀ : ∀ j, b * v₀ j = 1 + ∑ k, M₀ j k * v₀ k)
     (hvx : ∀ j, b * vx j = 1 + ∑ k, Mx j k * vx k)
-    (hε : 0 ≤ ε)
+    (_hε : 0 ≤ ε)
     (herr : ∀ j, |((Mx - M₀) *ᵥ v₀) j| ≤ ε * (b * v₀ j))
     (j : Fin s) :
     |vx j - v₀ j| ≤
@@ -341,9 +342,12 @@ theorem dotProduct_mulVec_gramMatrix {m s : ℕ} {z : Fin m → Fin s → ℝ}
   conv_lhs => rw [Finset.sum_comm]
   apply Finset.sum_congr rfl
   intro i _
-  conv_rhs => rw [pow_two, ← mul_assoc, Finset.mul_sum]
+  rw [pow_two, Finset.sum_mul_sum]
+  simp_rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro j' _
+  apply Finset.sum_congr rfl
+  intro k _
   ring
 
 /-! ## Quadratic-form slack comparison -/
@@ -363,11 +367,11 @@ theorem weighted_gram_qf_perturbation {m s : ℕ} {z : Fin m → Fin s → ℝ}
     _ ≤ ∑ i, ε * (w i * (z i ⬝ᵥ h) ^ 2) := by
         apply Finset.sum_le_sum
         intro i _
-        rw [← sub_mul, abs_mul, abs_of_nonneg (sq_nonneg _)]
+        rw [← sub_mul, abs_mul, abs_of_nonneg (sq_nonneg (z i ⬝ᵥ h))]
         have hle := mul_le_mul_of_nonneg_right (hpert i)
           (sq_nonneg (z i ⬝ᵥ h))
         linarith
-    _ = ε * ∑ i, w i * (z i ⬝ᵥ h) ^ 2 := Finset.mul_sum _ _ _
+    _ = ε * ∑ i, w i * (z i ⬝ᵥ h) ^ 2 := by rw [Finset.mul_sum]
 
 /-- The slack quadratic forms of `M₀` and `Mx` differ by the difference
 of their quadratic forms: `Aₓ[h] − A₀[h] = hᵀM₀h − hᵀMₓh`. -/
@@ -375,9 +379,17 @@ theorem slackQuadratic_sub_eq {s : ℕ} (b : ℝ) (M₀ Mx : Input s s)
     (h : Fin s → ℝ) :
     slackQuadratic b Mx h - slackQuadratic b M₀ h =
       h ⬝ᵥ (M₀ *ᵥ h) - h ⬝ᵥ (Mx *ᵥ h) := by
-  rw [slackQuadratic_eq_dotProduct, slackQuadratic_eq_dotProduct]
-  simp only [slackMatrix_mulVec, dotProduct, Matrix.mulVec, Pi.sub_apply]
-  simp_rw [mul_sub, Finset.sum_sub_distrib]
+  have hdot : ∀ M : Input s s,
+      h ⬝ᵥ (M *ᵥ h) = ∑ j, h j * ∑ k, M j k * h k := by
+    intro M
+    simp only [dotProduct]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [Matrix.mulVec_apply_eq_sum]
+  unfold slackQuadratic
+  rw [hdot M₀, hdot Mx, ← Finset.sum_sub_distrib, ← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro j _
   ring
 
 /-- **Slack stability (the quadratic-form (B.5) conclusion).**  For the
@@ -396,7 +408,7 @@ theorem slackQuadratic_stability {m s : ℕ} {b ε κ : ℝ}
       slackQuadratic b (gramMatrix z w') h := by
   have hdiff := slackQuadratic_sub_eq b (gramMatrix z w) (gramMatrix z w') h
   rw [dotProduct_mulVec_gramMatrix, dotProduct_mulVec_gramMatrix] at hdiff
-  have hpert' := weighted_gram_qf_perturbation h hpert
+  have hpert' := weighted_gram_qf_perturbation (z := z) h hpert
   have hQ : -(ε * ∑ i, w i * (z i ⬝ᵥ h) ^ 2) ≤
       ∑ i, w i * (z i ⬝ᵥ h) ^ 2 - ∑ i, w' i * (z i ⬝ᵥ h) ^ 2 := by
     linarith [(abs_le.mp hpert').2]
@@ -405,5 +417,139 @@ theorem slackQuadratic_stability {m s : ℕ} {b ε κ : ℝ}
     have := mul_le_mul_of_nonneg_left hdom hε
     linarith
   linarith
+
+/-! ## The resolvent Loewner comparison `Rₓ ⪯ (1 + Caκ)·R₀`
+
+Appendix B's resolvent perturbation step: inside the trust window the moved
+slack `Aₓ` dominates `(1 − δ)·A₀` at quadratic-form level (the conclusion of
+`slackQuadratic_stability`), and inverting the pair — by the same
+`max_y (2⟨x,y⟩ − yᵀSy)` completing-the-square argument as `qfLower_inv_le`,
+applied pairwise — gives `xᵀRₓx ≤ (1−δ)⁻¹·xᵀR₀x` for every `x`, i.e.
+`Rₓ ⪯ (1 + Caκ)·R₀` with `Caκ = (1−δ)⁻¹ − 1`.  Everything stays at the
+quadratic-form level; no operator square roots are needed. -/
+
+/-- **Pairwise inverse propagation.**  If `S` is positive definite and its
+quadratic form is bounded below by `c` times that of a positive definite `T`,
+then `Q_{S⁻¹}[x] ≤ c⁻¹·Q_{T⁻¹}[x]` for every `x`.  This is the pairwise
+version of `qfLower_inv_le`: `xᵀS⁻¹x = 2⟨x,y*⟩ − y*ᵀSy*` at `y* = S⁻¹x`, and
+`2⟨x,z⟩ − c·zᵀTz ≤ c⁻¹·xᵀT⁻¹x` for every `z` by nonnegativity of
+`c·(z − c⁻¹T⁻¹x)ᵀT(z − c⁻¹T⁻¹x)`. -/
+theorem qf_rel_lower_inv_le {d : ℕ} {c : ℝ}
+    {S T : Matrix (Fin d) (Fin d) ℝ}
+    (hS : S.PosDef) (hT : T.PosDef) (hc : 0 < c)
+    (hrel : ∀ y : Fin d → ℝ, c * (y ⬝ᵥ (T *ᵥ y)) ≤ y ⬝ᵥ (S *ᵥ y))
+    (x : Fin d → ℝ) :
+    x ⬝ᵥ (S⁻¹ *ᵥ x) ≤ c⁻¹ * (x ⬝ᵥ (T⁻¹ *ᵥ x)) := by
+  have hdetS : IsUnit S.det := (Matrix.isUnit_iff_isUnit_det S).mp hS.isUnit
+  have hdetT : IsUnit T.det := (Matrix.isUnit_iff_isUnit_det T).mp hT.isUnit
+  have hTpsd : T.PosSemidef := hT.posSemidef
+  have hTsym : T.IsSymm := hT.isHermitian.isSymm
+  -- Completing the square: `2⟨x,z⟩ − c·zᵀTz ≤ c⁻¹·xᵀT⁻¹x` for every `z`.
+  have key : ∀ z : Fin d → ℝ,
+      2 * (x ⬝ᵥ z) - c * (z ⬝ᵥ (T *ᵥ z)) ≤
+        c⁻¹ * (x ⬝ᵥ (T⁻¹ *ᵥ x)) := by
+    intro z
+    set w := c⁻¹ • (T⁻¹ *ᵥ x) with hw
+    have hTw : T *ᵥ w = c⁻¹ • x := by
+      rw [hw, Matrix.mulVec_smul, Matrix.mulVec_mulVec,
+        Matrix.mul_nonsing_inv T hdetT, Matrix.one_mulVec]
+    have hnn0 : 0 ≤ star (z - w) ⬝ᵥ (T *ᵥ (z - w)) :=
+      hTpsd.dotProduct_mulVec_nonneg (z - w)
+    rw [star_trivial] at hnn0
+    have hnn : 0 ≤ c * ((z - w) ⬝ᵥ (T *ᵥ (z - w))) :=
+      mul_nonneg hc.le hnn0
+    have hexp : (z - w) ⬝ᵥ (T *ᵥ (z - w)) =
+        z ⬝ᵥ (T *ᵥ z) - 2 * (z ⬝ᵥ (T *ᵥ w)) + w ⬝ᵥ (T *ᵥ w) := by
+      rw [Matrix.mulVec_sub, sub_dotProduct, dotProduct_sub, dotProduct_sub,
+        hTsym.dotProduct_mulVec_comm (x := w) (y := z)]
+      ring
+    have hw' : w ⬝ᵥ (T *ᵥ w) = c⁻¹ * (c⁻¹ * (x ⬝ᵥ (T⁻¹ *ᵥ x))) := by
+      rw [hTw, dotProduct_smul, hw, smul_dotProduct,
+        dotProduct_comm ((T⁻¹ *ᵥ x)) x]
+      ring
+    have hz' : z ⬝ᵥ (T *ᵥ w) = c⁻¹ * (x ⬝ᵥ z) := by
+      rw [hTw, dotProduct_smul, dotProduct_comm z x, smul_eq_mul]
+    have hcz : c * (z ⬝ᵥ (T *ᵥ w)) = x ⬝ᵥ z := by
+      rw [hz', mul_inv_cancel_left₀ hc.ne']
+    have hcw : c * (w ⬝ᵥ (T *ᵥ w)) = c⁻¹ * (x ⬝ᵥ (T⁻¹ *ᵥ x)) := by
+      rw [hw', ← mul_assoc, mul_inv_cancel₀ hc.ne', one_mul]
+    nlinarith [hnn, hexp, hcz, hcw]
+  set y := S⁻¹ *ᵥ x with hy
+  have hSy : S *ᵥ y = x := by
+    rw [hy, Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv S hdetS,
+      Matrix.one_mulVec]
+  have heq : x ⬝ᵥ (S⁻¹ *ᵥ x) = 2 * (x ⬝ᵥ y) - y ⬝ᵥ (S *ᵥ y) := by
+    rw [hSy, dotProduct_comm y x]
+    ring
+  rw [heq]
+  calc 2 * (x ⬝ᵥ y) - y ⬝ᵥ (S *ᵥ y)
+      ≤ 2 * (x ⬝ᵥ y) - c * (y ⬝ᵥ (T *ᵥ y)) := by linarith [hrel y]
+    _ ≤ c⁻¹ * (x ⬝ᵥ (T⁻¹ *ᵥ x)) := key y
+
+/-- **Resolvent Loewner comparison, relative form.**  If the moved slack
+stays above `(1 − δ)` times the anchor at quadratic-form level — the
+conclusion of `slackQuadratic_stability` — then `Rₓ[h] ≤ (1−δ)⁻¹·R₀[h]` for
+every `h`. -/
+theorem resolvent_loewner_le_of_slack_rel {s : ℕ} {b δ : ℝ}
+    {M₀ Mx : Input s s}
+    (hpos₀ : (slackMatrix b M₀).PosDef) (hposx : (slackMatrix b Mx).PosDef)
+    (hδ : 0 < 1 - δ)
+    (hrel : ∀ h : Fin s → ℝ,
+      (1 - δ) * slackQuadratic b M₀ h ≤ slackQuadratic b Mx h)
+    (h : Fin s → ℝ) :
+    h ⬝ᵥ ((slackMatrix b Mx)⁻¹ *ᵥ h) ≤
+      (1 - δ)⁻¹ * (h ⬝ᵥ ((slackMatrix b M₀)⁻¹ *ᵥ h)) := by
+  apply qf_rel_lower_inv_le hposx hpos₀ hδ _ h
+  intro y
+  have h1 := hrel y
+  rwa [slackQuadratic_eq_dotProduct, slackQuadratic_eq_dotProduct] at h1
+
+/-- **The (B.10) resolvent comparison from a Gram weight perturbation.**  If
+`Mx = gramMatrix z w'` differs from the anchor `M₀ = gramMatrix z w` by a
+relative weight change `|w'ᵢ − wᵢ| ≤ ε·wᵢ`, and the anchor Gram quadratic
+form is dominated by `κ·A₀` (as supplied by
+`weighted_gram_slack_domination`), then `Rₓ[h] ≤ (1 − εκ)⁻¹·R₀[h]`. -/
+theorem resolvent_loewner_le_of_gram_perturbation {m s : ℕ} {b ε κ : ℝ}
+    {z : Fin m → Fin s → ℝ} {w w' : Fin m → ℝ}
+    (hpos₀ : (slackMatrix b (gramMatrix z w)).PosDef)
+    (hposx : (slackMatrix b (gramMatrix z w')).PosDef)
+    (hε : 0 ≤ ε) (hεκ : 0 < 1 - ε * κ)
+    (hpert : ∀ i, |w' i - w i| ≤ ε * w i)
+    (hdom : ∀ h : Fin s → ℝ, ∑ i, w i * (z i ⬝ᵥ h) ^ 2 ≤
+      κ * slackQuadratic b (gramMatrix z w) h)
+    (h : Fin s → ℝ) :
+    h ⬝ᵥ ((slackMatrix b (gramMatrix z w'))⁻¹ *ᵥ h) ≤
+      (1 - ε * κ)⁻¹ * (h ⬝ᵥ ((slackMatrix b (gramMatrix z w))⁻¹ *ᵥ h)) :=
+  resolvent_loewner_le_of_slack_rel hpos₀ hposx hεκ
+    (fun y => slackQuadratic_stability y hε hpert (hdom y)) h
+
+/-- The reciprocal bound in `1 + c` form: `(1−δ)⁻¹ ≤ 1 + c` whenever
+`1 ≤ (1−δ)(1+c)` (equivalently `δ ≤ c/(1+c)`). -/
+theorem inv_one_sub_le_one_add {δ c : ℝ} (_hc : 0 < c) (hδ : 0 < 1 - δ)
+    (h : 1 ≤ (1 - δ) * (1 + c)) : (1 - δ)⁻¹ ≤ 1 + c := by
+  rw [← one_div, div_le_iff₀ hδ]
+  nlinarith [h]
+
+/-- **The resolvent comparison `Rₓ ⪯ (1 + Caκ)·R₀`.**  The (B.10) conclusion
+in `1 + Caκ` form: the relative slack bound with `δ ≤ c/(1+c)` inverts to
+`Rₓ[h] ≤ (1 + c)·R₀[h]`. -/
+theorem resolvent_loewner_le_one_add {s : ℕ} {b δ c : ℝ}
+    {M₀ Mx : Input s s}
+    (hpos₀ : (slackMatrix b M₀).PosDef) (hposx : (slackMatrix b Mx).PosDef)
+    (hc : 0 < c) (hδ : 0 < 1 - δ)
+    (hδc : 1 ≤ (1 - δ) * (1 + c))
+    (hrel : ∀ h : Fin s → ℝ,
+      (1 - δ) * slackQuadratic b M₀ h ≤ slackQuadratic b Mx h)
+    (h : Fin s → ℝ) :
+    h ⬝ᵥ ((slackMatrix b Mx)⁻¹ *ᵥ h) ≤
+      (1 + c) * (h ⬝ᵥ ((slackMatrix b M₀)⁻¹ *ᵥ h)) := by
+  have hnn0 : 0 ≤ star h ⬝ᵥ ((slackMatrix b M₀)⁻¹ *ᵥ h) :=
+    hpos₀.inv.posSemidef.dotProduct_mulVec_nonneg h
+  rw [star_trivial] at hnn0
+  calc h ⬝ᵥ ((slackMatrix b Mx)⁻¹ *ᵥ h)
+      ≤ (1 - δ)⁻¹ * (h ⬝ᵥ ((slackMatrix b M₀)⁻¹ *ᵥ h)) :=
+        resolvent_loewner_le_of_slack_rel hpos₀ hposx hδ hrel h
+    _ ≤ (1 + c) * (h ⬝ᵥ ((slackMatrix b M₀)⁻¹ *ᵥ h)) :=
+        mul_le_mul_of_nonneg_right (inv_one_sub_le_one_add hc hδ hδc) hnn0
 
 end Komlos

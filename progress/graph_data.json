@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-14 17:29:27",
+  "generated": "2026-10-14 23:41:39",
   "nodes": [
     {
       "id": "thm11",
@@ -226,10 +226,121 @@
       "order": 2,
       "label": "Adaptive trial concentration",
       "sub": "missing",
-      "notes": "Concentration for the *adaptive Gaussian* trials. Only a finite uniform sign-model version exists so far.",
+      "notes": "Concentration for the *adaptive Gaussian* trials. The net/union-bound/predictable-iteration machinery now exists in GaussianInvariant.lean; the per-step density invariant (`step_ae`) and the Gaussian small-ball instantiation remain hypothesis fields.",
       "decls": [],
       "resolved": [],
       "status": "missing"
+    },
+    {
+      "id": "gaussinvariant",
+      "kind": "result",
+      "tier": 3,
+      "order": 1.5,
+      "conditional": true,
+      "label": "Predictable Gaussian iteration",
+      "sub": "GaussianInvariant.lean",
+      "decls": [
+        "MetricNet",
+        "exists_metricNet",
+        "exists_metricNet_sphere_pi",
+        "exists_metricNet_euclideanSphere",
+        "measure_biUnion_finset_le_const",
+        "inner_tail_transfer",
+        "measure_iUnion_le_net",
+        "measure_iUnion_inner_tail_le",
+        "PredictableSteps",
+        "jointLaw",
+        "jointLaw_map_histTrunc",
+        "jointLaw_iid",
+        "ae_goodHist_jointLaw",
+        "AdaptiveGaussianSteps",
+        "GaussianInvariantInput",
+        "GaussianInvariantInput.ae_jointLaw"
+      ],
+      "notes": "The D.7\u2013D.9 machinery: finite \u03b5-nets on compact sets/spheres, finite union bounds, Lipschitz tail transfer, predictable-iteration joint law (`jointLaw` via iterated compProd), and `ae_goodHist_jointLaw` \u2014 induction propagating a per-step a.e. invariant to the whole trajectory. The per-step Gaussian invariant itself remains an encapsulated field of `GaussianInvariantInput`.",
+      "resolved": [
+        {
+          "name": "MetricNet",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 23
+        },
+        {
+          "name": "exists_metricNet",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 32
+        },
+        {
+          "name": "exists_metricNet_sphere_pi",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 45
+        },
+        {
+          "name": "exists_metricNet_euclideanSphere",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 50
+        },
+        {
+          "name": "measure_biUnion_finset_le_const",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 57
+        },
+        {
+          "name": "inner_tail_transfer",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 90
+        },
+        {
+          "name": "measure_iUnion_le_net",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 112
+        },
+        {
+          "name": "measure_iUnion_inner_tail_le",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 144
+        },
+        {
+          "name": "PredictableSteps",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 223
+        },
+        {
+          "name": "jointLaw",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 246
+        },
+        {
+          "name": "jointLaw_map_histTrunc",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 275
+        },
+        {
+          "name": "jointLaw_iid",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 295
+        },
+        {
+          "name": "ae_goodHist_jointLaw",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 371
+        },
+        {
+          "name": "AdaptiveGaussianSteps",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 449
+        },
+        {
+          "name": "GaussianInvariantInput",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 478
+        },
+        {
+          "name": "GaussianInvariantInput.ae_jointLaw",
+          "file": "Komlos/GaussianInvariant.lean",
+          "line": 494
+        }
+      ],
+      "status": "conditional"
     },
     {
       "id": "dyninv",
@@ -335,6 +446,99 @@
           "name": "transcriptDrift_tail_le",
           "file": "Komlos/RandomizedCoupling.lean",
           "line": 906
+        }
+      ],
+      "status": "conditional"
+    },
+    {
+      "id": "algcost",
+      "kind": "result",
+      "tier": 2,
+      "order": 6,
+      "conditional": true,
+      "label": "Concrete algorithm bit-cost",
+      "sub": "AlgorithmCost.lean",
+      "decls": [
+        "WalkStep",
+        "bitCost",
+        "accountedBound",
+        "bitCost_le_accountedBound",
+        "WalkProfile",
+        "WalkBudget",
+        "totalBitCost",
+        "totalBitCost_le_envelope",
+        "algorithmCostModel",
+        "algorithmCostModel_wellScaled",
+        "discrepancyRuntimeBound_algorithmCostModel",
+        "Theorem11WithRuntime'",
+        "theorem11WithRuntime'"
+      ],
+      "notes": "A concrete step-level model of the algorithm (batch sampling, Gram/resolvent evaluation, rank-one/block updates, guard checks, grid rounding) with per-step bit costs. `totalBitCost_le_envelope` bounds the walk inside 48\u00b7envelope, `algorithmCostModel \u03c9` is WellScaled, and `theorem11WithRuntime'` proves the corrected runtime statement conditional on signing existence.",
+      "resolved": [
+        {
+          "name": "WalkStep",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 13
+        },
+        {
+          "name": "bitCost",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 25
+        },
+        {
+          "name": "accountedBound",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 51
+        },
+        {
+          "name": "bitCost_le_accountedBound",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 62
+        },
+        {
+          "name": "WalkProfile",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 146
+        },
+        {
+          "name": "WalkBudget",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 225
+        },
+        {
+          "name": "totalBitCost",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 140
+        },
+        {
+          "name": "totalBitCost_le_envelope",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 242
+        },
+        {
+          "name": "algorithmCostModel",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 453
+        },
+        {
+          "name": "algorithmCostModel_wellScaled",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 489
+        },
+        {
+          "name": "discrepancyRuntimeBound_algorithmCostModel",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 506
+        },
+        {
+          "name": "Theorem11WithRuntime'",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 515
+        },
+        {
+          "name": "theorem11WithRuntime'",
+          "file": "Komlos/AlgorithmCost.lean",
+          "line": 519
         }
       ],
       "status": "conditional"
@@ -467,27 +671,27 @@
         {
           "name": "marked_progress_accounting",
           "file": "Komlos/Walk.lean",
-          "line": 156
+          "line": 179
         },
         {
           "name": "marked_step_count_bound",
           "file": "Komlos/Walk.lean",
-          "line": 168
+          "line": 191
         },
         {
           "name": "symmetric_boundary_hit",
           "file": "Komlos/Walk.lean",
-          "line": 178
+          "line": 201
         },
         {
           "name": "clipped_endpoint_hits_boundary",
           "file": "Komlos/Walk.lean",
-          "line": 198
+          "line": 221
         },
         {
           "name": "symmetric_endpoints_in_cube",
           "file": "Komlos/Walk.lean",
-          "line": 204
+          "line": 227
         }
       ],
       "status": "done"
@@ -662,6 +866,111 @@
           "name": "hasDerivAt_potentialSlope",
           "file": "Komlos/SpectralDimension.lean",
           "line": 1188
+        }
+      ],
+      "status": "conditional"
+    },
+    {
+      "id": "idischarge",
+      "kind": "result",
+      "tier": 3,
+      "order": 2.5,
+      "conditional": true,
+      "label": "Interface discharge ledger",
+      "sub": "InterfaceDischarge.lean",
+      "decls": [
+        "walk_of_existing",
+        "signing_leaf_exists",
+        "WalkSuccessInput'",
+        "WalkSuccessInput'.toWalkSuccessInput",
+        "exists_signing_discrepancy_below_99_of_reduced",
+        "WalkSuccessHypothesis'",
+        "DiscrepancyPartOfTheorem11_of_reducedWalkSuccess",
+        "tracked_decomp_of_barrier_data",
+        "SpectralHypotheses'",
+        "spectral_subspace_exists_of_hypotheses'",
+        "QuadPTransportInput",
+        "quadP_transport_of_input",
+        "RowUpdateInvariant",
+        "RowUpdateInvariant.anchorUpdate",
+        "maintenanceTotalOps_le_no_rebuild"
+      ],
+      "notes": "Machine-checked ledger reducing conditional interfaces to their residual fields: WalkSuccessInput shrinks 12 \u2192 5 fields (canonical cube walk, leaf-signing, defect cap discharged), spectral/concavity/maintenance preconditions bridged. The remaining fields are the real open math.",
+      "resolved": [
+        {
+          "name": "walk_of_existing",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 25
+        },
+        {
+          "name": "signing_leaf_exists",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 42
+        },
+        {
+          "name": "WalkSuccessInput'",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 61
+        },
+        {
+          "name": "WalkSuccessInput'.toWalkSuccessInput",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 80
+        },
+        {
+          "name": "exists_signing_discrepancy_below_99_of_reduced",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 96
+        },
+        {
+          "name": "WalkSuccessHypothesis'",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 102
+        },
+        {
+          "name": "DiscrepancyPartOfTheorem11_of_reducedWalkSuccess",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 114
+        },
+        {
+          "name": "tracked_decomp_of_barrier_data",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 120
+        },
+        {
+          "name": "SpectralHypotheses'",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 157
+        },
+        {
+          "name": "spectral_subspace_exists_of_hypotheses'",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 172
+        },
+        {
+          "name": "QuadPTransportInput",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 471
+        },
+        {
+          "name": "quadP_transport_of_input",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 516
+        },
+        {
+          "name": "RowUpdateInvariant",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 533
+        },
+        {
+          "name": "RowUpdateInvariant.anchorUpdate",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 542
+        },
+        {
+          "name": "maintenanceTotalOps_le_no_rebuild",
+          "file": "Komlos/InterfaceDischarge.lean",
+          "line": 426
         }
       ],
       "status": "conditional"
@@ -906,6 +1215,99 @@
       "status": "done"
     },
     {
+      "id": "sphere_measure",
+      "kind": "result",
+      "tier": 3,
+      "order": 4.5,
+      "conditional": true,
+      "label": "Uniform sphere measure",
+      "sub": "SphereMeasure.lean",
+      "decls": [
+        "normalizeVec",
+        "sphereLaw",
+        "ae_sphereLaw_norm",
+        "sphereLaw_map_isometry",
+        "sphereLaw_neg",
+        "sphereSubtypeMeasure",
+        "sphereVecLaw",
+        "sphereLawOn",
+        "sphereLawOn_map_stabilizer",
+        "uniformSphereMeasure",
+        "uniformSphereMeasure_isUniform",
+        "IsUniformSphereLaw",
+        "IsUniformSphereLaw.meas_abs_inner_le"
+      ],
+      "notes": "The normalized uniform measure on the unit sphere built as the Gaussian pushforward x \u21a6 x/\u2016x\u2016: isometry-invariant, fair-oriented, supported on sphere \u2229 rangeZ. Bridges the dirRV surrogate to a real measure; uniqueness of the invariant measure on the homogeneous space remains encapsulated.",
+      "resolved": [
+        {
+          "name": "normalizeVec",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 23
+        },
+        {
+          "name": "sphereLaw",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 71
+        },
+        {
+          "name": "ae_sphereLaw_norm",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 80
+        },
+        {
+          "name": "sphereLaw_map_isometry",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 97
+        },
+        {
+          "name": "sphereLaw_neg",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 111
+        },
+        {
+          "name": "sphereSubtypeMeasure",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 149
+        },
+        {
+          "name": "sphereVecLaw",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 240
+        },
+        {
+          "name": "sphereLawOn",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 318
+        },
+        {
+          "name": "sphereLawOn_map_stabilizer",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 366
+        },
+        {
+          "name": "uniformSphereMeasure",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 424
+        },
+        {
+          "name": "uniformSphereMeasure_isUniform",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 433
+        },
+        {
+          "name": "IsUniformSphereLaw",
+          "file": "Komlos/UniformSphere.lean",
+          "line": 785
+        },
+        {
+          "name": "IsUniformSphereLaw.meas_abs_inner_le",
+          "file": "Komlos/SphereMeasure.lean",
+          "line": 687
+        }
+      ],
+      "status": "conditional"
+    },
+    {
       "id": "density_d5",
       "kind": "gap",
       "tier": 3,
@@ -975,6 +1377,50 @@
           "name": "exists_memLeaf_signing_few_bad_rows",
           "file": "Komlos/TrialConcentration.lean",
           "line": 711
+        }
+      ],
+      "status": "done"
+    },
+    {
+      "id": "conc_markov",
+      "kind": "result",
+      "tier": 3,
+      "order": 6.5,
+      "label": "Markov sign counting",
+      "sub": "ConcentrationMarkov.lean",
+      "decls": [
+        "card_univ_signing",
+        "signAvg_markov",
+        "bad_signing_fraction_le",
+        "exists_good_signing",
+        "good_signing_set_nonempty"
+      ],
+      "notes": "Markov's inequality over the uniform 2\u207f signing measure proved directly by Finset counting: at most a 1/p fraction of signings exceed p\u00b7(n/T\u00b2) bad rows, so a good signing exists. Still the finite uniform model, not the adaptive Gaussian tails.",
+      "resolved": [
+        {
+          "name": "card_univ_signing",
+          "file": "Komlos/ConcentrationMarkov.lean",
+          "line": 15
+        },
+        {
+          "name": "signAvg_markov",
+          "file": "Komlos/ConcentrationMarkov.lean",
+          "line": 23
+        },
+        {
+          "name": "bad_signing_fraction_le",
+          "file": "Komlos/ConcentrationMarkov.lean",
+          "line": 81
+        },
+        {
+          "name": "exists_good_signing",
+          "file": "Komlos/ConcentrationMarkov.lean",
+          "line": 96
+        },
+        {
+          "name": "good_signing_set_nonempty",
+          "file": "Komlos/ConcentrationMarkov.lean",
+          "line": 106
         }
       ],
       "status": "done"
@@ -1364,6 +1810,118 @@
       "status": "done"
     },
     {
+      "id": "resstab",
+      "kind": "result",
+      "tier": 4,
+      "order": 0.4,
+      "label": "Resolvent stability (B.5)",
+      "sub": "ResolventStability.lean",
+      "decls": [
+        "resolvent_vector_diff_eq",
+        "resolvent_vector_stability_correction",
+        "resolvent_vector_stability",
+        "resolvent_vector_stability_rel",
+        "weighted_gram_qf_perturbation",
+        "slackQuadratic_sub_eq",
+        "slackQuadratic_stability"
+      ],
+      "notes": "Entrywise/quadratic-form level of the (B.5) displacement chain: vx \u2212 v\u2080 = Ax\u207b\u00b9*\u1d65((Mx\u2212M\u2080)v\u2080), relative-error correction bounds, and slack-form stability Ax[h] \u2265 (1\u2212\u03b5\u03ba)\u00b7A\u2080[h] under relative weight perturbations.",
+      "resolved": [
+        {
+          "name": "resolvent_vector_diff_eq",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 31
+        },
+        {
+          "name": "resolvent_vector_stability_correction",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 65
+        },
+        {
+          "name": "resolvent_vector_stability",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 112
+        },
+        {
+          "name": "resolvent_vector_stability_rel",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 171
+        },
+        {
+          "name": "weighted_gram_qf_perturbation",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 279
+        },
+        {
+          "name": "slackQuadratic_sub_eq",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 298
+        },
+        {
+          "name": "slackQuadratic_stability",
+          "file": "Komlos/ResolventStability.lean",
+          "line": 316
+        }
+      ],
+      "status": "done"
+    },
+    {
+      "id": "anchordim",
+      "kind": "result",
+      "tier": 4,
+      "order": 0.6,
+      "label": "Anchor dimension bookkeeping",
+      "sub": "AnchorDimension.lean",
+      "decls": [
+        "finrank_inf_ge_add_sub",
+        "finrank_inf_inf_inf_inf_ge",
+        "finrank_inf_inf_inf_inf_ge_real",
+        "finrank_finset_inf_ge",
+        "finrank_intersection_ge_of_codim_bounds",
+        "finrank_intersection_ge_of_theta_bounds",
+        "anchor_subspace_of_intersection"
+      ],
+      "notes": "Codimension accounting for the anchor subspace: each intersection loses at most n dimensions, so five large subspaces (\u03b8\u1d62\u00b7n codim) intersect in dimension \u2265 n \u2212 (\u2211\u03b8\u1d62)\u00b7n. Supplies the dimension side of the anchor construction.",
+      "resolved": [
+        {
+          "name": "finrank_inf_ge_add_sub",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 14
+        },
+        {
+          "name": "finrank_inf_inf_inf_inf_ge",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 52
+        },
+        {
+          "name": "finrank_inf_inf_inf_inf_ge_real",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 39
+        },
+        {
+          "name": "finrank_finset_inf_ge",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 67
+        },
+        {
+          "name": "finrank_intersection_ge_of_codim_bounds",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 82
+        },
+        {
+          "name": "finrank_intersection_ge_of_theta_bounds",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 96
+        },
+        {
+          "name": "anchor_subspace_of_intersection",
+          "file": "Komlos/AnchorDimension.lean",
+          "line": 112
+        }
+      ],
+      "status": "done"
+    },
+    {
       "id": "nonpos",
       "kind": "result",
       "tier": 4,
@@ -1641,6 +2199,10 @@
       "gauss_inv"
     ],
     [
+      "gaussinvariant",
+      "conc"
+    ],
+    [
       "walk",
       "propA1"
     ],
@@ -1657,6 +2219,10 @@
       "propA1"
     ],
     [
+      "idischarge",
+      "propA1"
+    ],
+    [
       "resolv",
       "spectral"
     ],
@@ -1669,6 +2235,14 @@
       "spectral"
     ],
     [
+      "resstab",
+      "spectral"
+    ],
+    [
+      "anchordim",
+      "spectral"
+    ],
+    [
       "init",
       "propA1"
     ],
@@ -1678,6 +2252,10 @@
     ],
     [
       "density_d5",
+      "gauss_inv"
+    ],
+    [
+      "sphere_measure",
       "gauss_inv"
     ],
     [
@@ -1697,6 +2275,10 @@
       "conc"
     ],
     [
+      "conc_markov",
+      "conc"
+    ],
+    [
       "dyninv",
       "runtime"
     ],
@@ -1706,6 +2288,10 @@
     ],
     [
       "bitmodel",
+      "runtime"
+    ],
+    [
+      "algcost",
       "runtime"
     ],
     [
@@ -1743,14 +2329,26 @@
   ],
   "stats": {
     "counts": {
-      "done": 17,
-      "conditional": 9,
+      "done": 20,
+      "conditional": 13,
       "partial": 0,
       "missing": 2,
       "external": 2
     },
-    "declarations": 959,
+    "declarations": 1301,
     "files": {
+      "Komlos/AlgorithmCost.lean": {
+        "decls": 27,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
+      "Komlos/AnchorDimension.lean": {
+        "decls": 12,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
       "Komlos/AnchorUpdate.lean": {
         "decls": 104,
         "sorry": false,
@@ -1769,6 +2367,12 @@
         "axioms": [],
         "audited": true
       },
+      "Komlos/ConcentrationMarkov.lean": {
+        "decls": 5,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
       "Komlos/Curvature.lean": {
         "decls": 27,
         "sorry": false,
@@ -1781,6 +2385,12 @@
         "axioms": [],
         "audited": true
       },
+      "Komlos/DensityD5.lean": {
+        "decls": 50,
+        "sorry": false,
+        "axioms": [],
+        "audited": false
+      },
       "Komlos/DiscrepancyReduction.lean": {
         "decls": 2,
         "sorry": false,
@@ -1789,6 +2399,12 @@
       },
       "Komlos/DynamicMaintenance.lean": {
         "decls": 37,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
+      "Komlos/EpochBound.lean": {
+        "decls": 18,
         "sorry": false,
         "axioms": [],
         "audited": true
@@ -1823,6 +2439,12 @@
         "axioms": [],
         "audited": true
       },
+      "Komlos/GaussianInvariant.lean": {
+        "decls": 44,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
       "Komlos/GaussianMoments.lean": {
         "decls": 8,
         "sorry": false,
@@ -1837,6 +2459,12 @@
       },
       "Komlos/InitializationMargin.lean": {
         "decls": 8,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
+      "Komlos/InterfaceDischarge.lean": {
+        "decls": 46,
         "sorry": false,
         "axioms": [],
         "audited": true
@@ -1889,6 +2517,12 @@
         "axioms": [],
         "audited": true
       },
+      "Komlos/ResolventStability.lean": {
+        "decls": 20,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
       "Komlos/RowBoundA2.lean": {
         "decls": 13,
         "sorry": false,
@@ -1919,8 +2553,20 @@
         "axioms": [],
         "audited": true
       },
+      "Komlos/SphereMeasure.lean": {
+        "decls": 54,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
       "Komlos/StabilityTransport.lean": {
-        "decls": 31,
+        "decls": 41,
+        "sorry": false,
+        "axioms": [],
+        "audited": true
+      },
+      "Komlos/SubGaussianBound.lean": {
+        "decls": 24,
         "sorry": false,
         "axioms": [],
         "audited": true
@@ -1944,10 +2590,16 @@
         "audited": true
       },
       "Komlos/Walk.lean": {
-        "decls": 27,
+        "decls": 29,
         "sorry": false,
         "axioms": [],
         "audited": true
+      },
+      "Komlos/WalkCoins.lean": {
+        "decls": 30,
+        "sorry": false,
+        "axioms": [],
+        "audited": false
       },
       "Komlos.lean": {
         "decls": 55,
@@ -1960,31 +2612,31 @@
         "sorry": false,
         "axioms": [],
         "audited": true
-      },
-      "SDIso_tmp.lean": {
-        "decls": 0,
-        "sorry": false,
-        "axioms": [],
-        "audited": false
       }
     },
     "auditedFiles": [
       "Komlos.lean",
+      "Komlos/AlgorithmCost.lean",
+      "Komlos/AnchorDimension.lean",
       "Komlos/AnchorUpdate.lean",
       "Komlos/CompletionSampler.lean",
       "Komlos/ConcaveStep.lean",
+      "Komlos/ConcentrationMarkov.lean",
       "Komlos/Curvature.lean",
       "Komlos/CurvatureGeneral.lean",
       "Komlos/DiscrepancyReduction.lean",
       "Komlos/DynamicMaintenance.lean",
+      "Komlos/EpochBound.lean",
       "Komlos/FinitePrecision.lean",
       "Komlos/FiniteRounding.lean",
       "Komlos/GaussianCompletion.lean",
       "Komlos/GaussianDensity.lean",
       "Komlos/GaussianDisintegration.lean",
+      "Komlos/GaussianInvariant.lean",
       "Komlos/GaussianMoments.lean",
       "Komlos/HessianDecomposition.lean",
       "Komlos/InitializationMargin.lean",
+      "Komlos/InterfaceDischarge.lean",
       "Komlos/InverseMaintenanceBlock.lean",
       "Komlos/InverseUpdate.lean",
       "Komlos/MatrixInverse.lean",
@@ -1993,12 +2645,15 @@
       "Komlos/RandomizedCoupling.lean",
       "Komlos/Resolvent.lean",
       "Komlos/ResolventContinuity.lean",
+      "Komlos/ResolventStability.lean",
       "Komlos/RowBoundA2.lean",
       "Komlos/Runtime.lean",
       "Komlos/RuntimeBound.lean",
       "Komlos/SpectralDimension.lean",
       "Komlos/SpectralPath.lean",
+      "Komlos/SphereMeasure.lean",
       "Komlos/StabilityTransport.lean",
+      "Komlos/SubGaussianBound.lean",
       "Komlos/Theorem11Assembly.lean",
       "Komlos/TrialConcentration.lean",
       "Komlos/UniformSphere.lean",
@@ -2006,15 +2661,15 @@
       "KomlosAudit.lean"
     ],
     "lastAudit": {
-      "declarations": 1179,
+      "declarations": 1517,
       "allowedAxioms": [
         "propext",
         "Classical.choice",
         "Quot.sound"
       ],
       "command": "lake env lean -DwarningAsError=true KomlosAudit.lean",
-      "ranAt": "2026-10-13",
-      "note": "lake build succeeded (3842 jobs); audit reported 1179 theorem declarations with only permitted axioms"
+      "ranAt": "2026-10-14",
+      "note": "lake build succeeded (3851 jobs); audit reported 1517 theorem declarations with only permitted axioms"
     }
   }
 }

@@ -29,8 +29,16 @@ import Komlos.FiniteRounding
 import Komlos.GaussianDensity
 import Komlos.UniformSphere
 import Komlos.StabilityTransport
+import Komlos.ResolventStability
+import Komlos.AnchorDimension
 import Komlos.Theorem11Assembly
 import Komlos.RandomizedCoupling
+import Komlos.InterfaceDischarge
+import Komlos.SphereMeasure
+import Komlos.AlgorithmCost
+import Komlos.GaussianInvariant
+import Komlos.SubGaussianBound
+import Komlos.EpochBound
 import Lean.Util.CollectAxioms
 import Lean.Elab.Command
 

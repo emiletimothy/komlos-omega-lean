@@ -127,8 +127,29 @@ NODES = [
     dict(id="conc", kind="gap", tier=2, order=2,
          label="Adaptive trial concentration",
          sub="missing",
-         notes="Concentration for the *adaptive Gaussian* trials. Only a "
-               "finite uniform sign-model version exists so far."),
+         notes="Concentration for the *adaptive Gaussian* trials. The net/"
+               "union-bound/predictable-iteration machinery now exists in "
+               "GaussianInvariant.lean; the per-step density invariant "
+               "(`step_ae`) and the Gaussian small-ball instantiation "
+               "remain hypothesis fields."),
+    dict(id="gaussinvariant", kind="result", tier=3, order=1.5, conditional=True,
+         label="Predictable Gaussian iteration",
+         sub="GaussianInvariant.lean",
+         decls=["MetricNet", "exists_metricNet", "exists_metricNet_sphere_pi",
+                "exists_metricNet_euclideanSphere",
+                "measure_biUnion_finset_le_const", "inner_tail_transfer",
+                "measure_iUnion_le_net", "measure_iUnion_inner_tail_le",
+                "PredictableSteps", "jointLaw", "jointLaw_map_histTrunc",
+                "jointLaw_iid", "ae_goodHist_jointLaw",
+                "AdaptiveGaussianSteps", "GaussianInvariantInput",
+                "GaussianInvariantInput.ae_jointLaw"],
+         notes="The D.7–D.9 machinery: finite ε-nets on compact sets/"
+               "spheres, finite union bounds, Lipschitz tail transfer, "
+               "predictable-iteration joint law (`jointLaw` via iterated "
+               "compProd), and `ae_goodHist_jointLaw` — induction "
+               "propagating a per-step a.e. invariant to the whole "
+               "trajectory. The per-step Gaussian invariant itself "
+               "remains an encapsulated field of `GaussianInvariantInput`."),
     dict(id="dyninv", kind="result", tier=2, order=3, conditional=True,
          label="Fast dynamic inverse",
          sub="DynamicMaintenance.lean",
@@ -152,6 +173,22 @@ NODES = [
                "and Markov tail bounds for transcript drift. The "
                "paper's full filtration/coupling to the adaptive "
                "Gaussian walk is still a hypothesis."),
+    dict(id="algcost", kind="result", tier=2, order=6, conditional=True,
+         label="Concrete algorithm bit-cost",
+         sub="AlgorithmCost.lean",
+         decls=["WalkStep", "bitCost", "accountedBound",
+                "bitCost_le_accountedBound", "WalkProfile", "WalkBudget",
+                "totalBitCost", "totalBitCost_le_envelope",
+                "algorithmCostModel", "algorithmCostModel_wellScaled",
+                "discrepancyRuntimeBound_algorithmCostModel",
+                "Theorem11WithRuntime'", "theorem11WithRuntime'"],
+         notes="A concrete step-level model of the algorithm (batch "
+               "sampling, Gram/resolvent evaluation, rank-one/block "
+               "updates, guard checks, grid rounding) with per-step bit "
+               "costs. `totalBitCost_le_envelope` bounds the walk inside "
+               "48·envelope, `algorithmCostModel ω` is WellScaled, and "
+               "`theorem11WithRuntime'` proves the corrected runtime "
+               "statement conditional on signing existence."),
     dict(id="bitmodel", kind="result", tier=2, order=5,
          label="Bit-cost vocabulary",
          sub="Runtime.lean",
@@ -204,6 +241,24 @@ NODES = [
                "unconditionally in NonpositiveSubspace.lean, and "
                "StabilityTransport.lean adds the (B.5)–(B.10) "
                "displacement bounds. All audited."),
+    dict(id="idischarge", kind="result", tier=3, order=2.5, conditional=True,
+         label="Interface discharge ledger",
+         sub="InterfaceDischarge.lean",
+         decls=["walk_of_existing", "signing_leaf_exists",
+                "WalkSuccessInput'", "WalkSuccessInput'.toWalkSuccessInput",
+                "exists_signing_discrepancy_below_99_of_reduced",
+                "WalkSuccessHypothesis'",
+                "DiscrepancyPartOfTheorem11_of_reducedWalkSuccess",
+                "tracked_decomp_of_barrier_data", "SpectralHypotheses'",
+                "spectral_subspace_exists_of_hypotheses'",
+                "QuadPTransportInput", "quadP_transport_of_input",
+                "RowUpdateInvariant", "RowUpdateInvariant.anchorUpdate",
+                "maintenanceTotalOps_le_no_rebuild"],
+         notes="Machine-checked ledger reducing conditional interfaces to "
+               "their residual fields: WalkSuccessInput shrinks 12 → 5 "
+               "fields (canonical cube walk, leaf-signing, defect cap "
+               "discharged), spectral/concavity/maintenance preconditions "
+               "bridged. The remaining fields are the real open math."),
     dict(id="rows", kind="result", tier=3, order=3,
          label="Row & barrier estimates",
          sub="Komlos.lean",
@@ -237,6 +292,21 @@ NODES = [
          notes="Regular conditional law of a standard Gaussian under a "
                "continuous linear map: Law(LZ,Z) = Law(LZ) ⊗ₘ kernel, with "
                "shifted standard Gaussian on ker L."),
+    dict(id="sphere_measure", kind="result", tier=3, order=4.5, conditional=True,
+         label="Uniform sphere measure",
+         sub="SphereMeasure.lean",
+         decls=["normalizeVec", "sphereLaw", "ae_sphereLaw_norm",
+                "sphereLaw_map_isometry", "sphereLaw_neg",
+                "sphereSubtypeMeasure", "sphereVecLaw",
+                "sphereLawOn", "sphereLawOn_map_stabilizer",
+                "uniformSphereMeasure", "uniformSphereMeasure_isUniform",
+                "IsUniformSphereLaw", "IsUniformSphereLaw.meas_abs_inner_le"],
+         notes="The normalized uniform measure on the unit sphere built as "
+               "the Gaussian pushforward x ↦ x/‖x‖: isometry-invariant, "
+               "fair-oriented, supported on sphere ∩ rangeZ. Bridges the "
+               "dirRV surrogate to a real measure; uniqueness of the "
+               "invariant measure on the homogeneous space remains "
+               "encapsulated."),
     dict(id="density_d5", kind="gap", tier=3, order=5,
          label="Explicit density (D.5)",
          sub="Gram Jacobian · Wishart",
@@ -253,6 +323,17 @@ NODES = [
          notes="Uniform model over Fin n → Bool: second-moment identities, "
                "Markov bad-row counting, and a bridge to SymmetricWalk. "
                "Not the adaptive Gaussian tails the paper needs."),
+    dict(id="conc_markov", kind="result", tier=3, order=6.5,
+         label="Markov sign counting",
+         sub="ConcentrationMarkov.lean",
+         decls=["card_univ_signing", "signAvg_markov",
+                "bad_signing_fraction_le", "exists_good_signing",
+                "good_signing_set_nonempty"],
+         notes="Markov's inequality over the uniform 2ⁿ signing measure "
+               "proved directly by Finset counting: at most a 1/p "
+               "fraction of signings exceed p·(n/T²) bad rows, so a good "
+               "signing exists. Still the finite uniform model, not the "
+               "adaptive Gaussian tails."),
     dict(id="invblock", kind="result", tier=3, order=7,
          label="Block inverse update",
          sub="Eq. 4.5 · InverseMaintenanceBlock",
@@ -304,6 +385,32 @@ NODES = [
                 "slack_posDef_of_positive_supersolution",
                 "anchor_guard_sound", "resolvent_vector_relative_change",
                 "resolvent_vector_relative_bounds"]),
+    dict(id="resstab", kind="result", tier=4, order=0.4,
+         label="Resolvent stability (B.5)",
+         sub="ResolventStability.lean",
+         decls=["resolvent_vector_diff_eq",
+                "resolvent_vector_stability_correction",
+                "resolvent_vector_stability",
+                "resolvent_vector_stability_rel",
+                "weighted_gram_qf_perturbation", "slackQuadratic_sub_eq",
+                "slackQuadratic_stability"],
+         notes="Entrywise/quadratic-form level of the (B.5) displacement "
+               "chain: vx − v₀ = Ax⁻¹*ᵥ((Mx−M₀)v₀), relative-error "
+               "correction bounds, and slack-form stability "
+               "Ax[h] ≥ (1−εκ)·A₀[h] under relative weight perturbations."),
+    dict(id="anchordim", kind="result", tier=4, order=0.6,
+         label="Anchor dimension bookkeeping",
+         sub="AnchorDimension.lean",
+         decls=["finrank_inf_ge_add_sub", "finrank_inf_inf_inf_inf_ge",
+                "finrank_inf_inf_inf_inf_ge_real", "finrank_finset_inf_ge",
+                "finrank_intersection_ge_of_codim_bounds",
+                "finrank_intersection_ge_of_theta_bounds",
+                "anchor_subspace_of_intersection"],
+         notes="Codimension accounting for the anchor subspace: each "
+               "intersection loses at most n dimensions, so five large "
+               "subspaces (θᵢ·n codim) intersect in dimension "
+               "≥ n − (∑θᵢ)·n. Supplies the dimension side of the anchor "
+               "construction."),
     dict(id="nonpos", kind="result", tier=4, order=0.5,
          label="Nonpositive subspace (B.4)",
          sub="NonpositiveSubspace.lean",
@@ -366,26 +473,33 @@ EDGES = [
     ("propA1", "disc"),
     ("gauss_inv", "disc"),
     ("conc", "gauss_inv"),
+    ("gaussinvariant", "conc"),
 
     ("walk", "propA1"),
     ("concave", "propA1"),
     ("rows", "propA1"),
     ("spectral", "propA1"),
+    ("idischarge", "propA1"),
     ("resolv", "spectral"),
     ("curv", "spectral"),
     ("nonpos", "spectral"),
+    ("resstab", "spectral"),
+    ("anchordim", "spectral"),
     ("init", "propA1"),
 
     ("gauss_cond", "gauss_inv"),
     ("density_d5", "gauss_inv"),
+    ("sphere_measure", "gauss_inv"),
     ("gcomplete", "gauss_cond"),
     ("gauss_mom", "density_d5"),
     ("gauss_mom", "conc"),
     ("conc_finite", "conc"),
+    ("conc_markov", "conc"),
 
     ("dyninv", "runtime"),
     ("dither", "runtime"),
     ("bitmodel", "runtime"),
+    ("algcost", "runtime"),
     ("invblock", "dyninv"),
     ("rankone", "dyninv"),
     ("cont", "dyninv"),

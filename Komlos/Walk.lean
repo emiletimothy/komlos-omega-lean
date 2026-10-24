@@ -138,6 +138,36 @@ theorem terminal_average_le_root {n : ℕ} (f : (Fin n → ℝ) → ℝ)
       simp only [terminalAverage, root]
       linarith
 
+/-- **Supermartingale criterion.** If `F` is pair-average nonincreasing at
+every coherent branch — `(F(x+d)+F(x−d))/2 ≤ F(x)`, the fair-sign
+expectation bound — then `LocalAverageNonincrease` holds on every coherent
+tree.  In the application `F` is the resolvent potential and `hpair` is
+`pair_average_resolventPotential_quad` inside the concavity window. -/
+theorem localAverageNonincrease_of_pairwise {n : ℕ} (F : (Fin n → ℝ) → ℝ)
+    (tree : SymmetricWalk n) (hc : Coherent tree)
+    (hpair : ∀ x d : Fin n → ℝ,
+      (F (fun j => x j + d j) + F (fun j => x j - d j)) / 2 ≤ F x) :
+    LocalAverageNonincrease F tree := by
+  induction tree with
+  | leaf x => trivial
+  | branch x d left right ihl ihr =>
+    obtain ⟨hl, hr, hcl, hcr⟩ := hc
+    refine ⟨?_, ihl hcl, ihr hcr⟩
+    rw [hl, hr]
+    exact hpair x d
+
+/-- **The potential supermartingale along the walk.** For a coherent
+`SymmetricWalk` whose every node satisfies the pair-average concavity, the
+uniform leaf average of `F` stays below its root value — the iterated form
+of the paper's `Eσ F_b(M(x + σth)) ≤ F_b(M(x))` (Propositions 2.1/3.2). -/
+theorem terminal_average_le_root_of_pairwise {n : ℕ} (F : (Fin n → ℝ) → ℝ)
+    (tree : SymmetricWalk n) (hc : Coherent tree)
+    (hpair : ∀ x d : Fin n → ℝ,
+      (F (fun j => x j + d j) + F (fun j => x j - d j)) / 2 ≤ F x) :
+    terminalAverage F tree ≤ F (root tree) :=
+  terminal_average_le_root F tree
+    (localAverageNonincrease_of_pairwise F tree hc hpair)
+
 noncomputable def markedMoveCountAverage {n : ℕ} (mark : SymmetricWalk n → Bool) :
     SymmetricWalk n → ℝ
   | .leaf _ => 0

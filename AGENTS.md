@@ -32,12 +32,15 @@ Appendix B (spectral dimension / curvature):
 - Komlos/SpectralDimension.lean: exact resolvent step identities, `potentialSlope`/`potentialHessian`, batch relative-change bounds, dimension-margin bookkeeping, conditional `dim > s/32` spectral-subspace theorem.
 - Komlos/ResolventContinuity.lean, Komlos/CurvatureGeneral.lean, Komlos/SpectralPath.lean, Komlos/PotentialConcavity.lean, Komlos/ConcaveStep.lean: pathwise resolvent calculus and potential concavity along the batch quadratic path.
 - Komlos/NonpositiveSubspace.lean: the spectral counting lemma (PSD Q with diagonal dominated by D admits a large-dimension Q−D-nonpositive subspace).
+- Komlos/ResolventStability.lean: entrywise/quadratic-form (B.5) chain — `resolvent_vector_diff_eq`, relative-error correction bounds, `weighted_gram_qf_perturbation`, `slackQuadratic_stability` (`Aₓ[h] ≥ (1−εκ)·A₀[h]`).
+- Komlos/AnchorDimension.lean: codimension bookkeeping for the anchor subspace — two-fold/fivefold `finrank` infimum inequalities and `anchor_subspace_of_intersection`.
 
 Gaussian / Appendix D:
 - Komlos/GaussianCompletion.lean: quadratic-form lower/upper bounds and Loewner inverse propagation (QF machinery for Lemma D.1).
 - Komlos/GaussianMoments.lean: Gaussian even moments `(2q−1)‼`, χ²₁ mgf `E[e^{tX²}] = (1−2t)^{-1/2}`, Gaussian small-ball bound.
 - Komlos/GaussianDisintegration.lean: conditional standard-Gaussian laws under linear maps — `stdGaussian` splits across K ⊕ Kᗮ, `gaussLift` (Moore–Penrose lift), joint law `Law(LZ) ⊗ₘ gaussCondKernel`. The "hidden Gaussian stays Gaussian after conditioning" core.
 - Komlos/GaussianDensity.lean: adaptive Gaussian density invariant development.
+- Komlos/GaussianInvariant.lean: the D.7–D.9 machinery — finite ε-nets on compact sets/spheres (`exists_metricNet*`), finite union bounds, Lipschitz tail transfer, `PredictableSteps`/`jointLaw` (iterated `compProd` trajectory law), and `ae_goodHist_jointLaw` predictable induction. The per-step Gaussian invariant remains a field of `GaussianInvariantInput`.
 - Komlos/CompletionSampler.lean: sampler-side definitions.
 
 Algorithm / maintenance / precision / runtime:
@@ -52,13 +55,17 @@ Algorithm / maintenance / precision / runtime:
 - Komlos/StabilityTransport.lean: (B.5)–(B.10) displacement bounds transporting the curvature bound from the anchor to the trust window.
 - Komlos/HessianDecomposition.lean: the `∇²F_b = P − D` identification (in the audit).
 - Komlos/UniformSphere.lean: `dirRV` law invariance under the `range Z` stabilizer, fair orientation (`dirRV_law_neg`), support on `sphere ∩ rangeZ` — the invariance surrogate for "uniform on the sphere" (Mathlib has no normalized sphere measure).
+- Komlos/SphereMeasure.lean: the actual normalized uniform sphere measure `sphereLaw`/`sphereLawOn`/`uniformSphereMeasure` as the Gaussian pushforward `x ↦ x/‖x‖` — isometry invariance, fair orientation, support on `sphere ∩ rangeZ`; `dirLaw` equality modulo the `IsUniformSphereLawUnique` hypothesis (proved unconditionally in finrank 1).
 - Komlos/RandomizedCoupling.lean: finite coin-flip model of dithered rounding — unbiasedness, `p(1−p)` variance identity, `incSum` martingale recursion, `transcriptDrift` variance/tail bounds.
 - Komlos/RuntimeBound.lean: `WellScaled` cost-model predicate, `verificationBitCost ≤ runtimeEnvelope`, `discrepancyRuntimeBound_of_existence` (conditional runtime theorem), and a countermodel proving `Theorem11WithRuntime` is false for badly-scaled models.
 - Komlos/Theorem11Assembly.lean: `DiscrepancyPartOfTheorem11_of_walkSuccess` — Theorem 1.1 (discrepancy half) conditional on a 12-field `WalkSuccessInput`; docstring lists the residual checklist.
+- Komlos/ConcentrationMarkov.lean: Markov's inequality over the uniform `2ⁿ` signing model — `signAvg_markov`, `bad_signing_fraction_le`, `exists_good_signing`, `good_signing_set_nonempty`.
+- Komlos/InterfaceDischarge.lean: machine-checked discharge ledger — `WalkSuccessInput'` reduces `WalkSuccessInput` to 5 residual fields; `SpectralHypotheses'`, `QuadPTransportInput`, `RowUpdateInvariant` package the remaining hypothesis interfaces; `boolSigningExists_of_walkSuccess` derives `BoolSigningExists` from the walk package.
+- Komlos/AlgorithmCost.lean: concrete `WalkStep` bit-cost model — per-step accounting (`bitCost_le_accountedBound`), `WalkBudget`, `totalBitCost_le_envelope` (`≤ 48·runtimeEnvelope`), `algorithmCostModel ω` is `WellScaled`, `discrepancyRuntimeBound_algorithmCostModel`, and the corrected statement `Theorem11WithRuntime'` proved conditional on `BoolSigningExists`.
 
 Still open / conditional:
 - The adaptive Gaussian density invariant is only partially discharged (conditioning core proved; the full Lemma D.1 / Thm 4.1 chain, predictable iteration, and net arguments D.7–D.9 remain).
 - The `dirRV` law is proved invariant + fairly oriented; the remaining step to Thm 4.1's concentration conclusions is the martingale/predictable-iteration chain.
-- `WalkSuccessInput`'s fields (coherent cube-leaf walk, leaf-is-signing, still-large bound, completed/medium decomposition) are the residual checklist for `DiscrepancyPartOfTheorem11`.
-- `DiscrepancyRuntimeBound` proved only for `WellScaled` models conditional on signing existence; `Theorem11WithRuntime` as literally stated is refuted (`not_theorem11WithRuntime`).
+- `WalkSuccessInput` is reduced by `InterfaceDischarge.lean` to the 5-field `WalkSuccessInput'`: leaf choice/membership on the canonical cube walk, `Slarge`, `large_bound`, `completed_decomp` are the residual checklist for `DiscrepancyPartOfTheorem11`.
+- `DiscrepancyRuntimeBound` proved only for `WellScaled` models conditional on signing existence; `Theorem11WithRuntime` as literally stated is refuted (`not_theorem11WithRuntime`). The corrected `Theorem11WithRuntime'` in `AlgorithmCost.lean` is proved conditional on `BoolSigningExists`.
 - Nothing certifies Theorem 1.1 unconditionally.

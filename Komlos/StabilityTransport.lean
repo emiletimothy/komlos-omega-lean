@@ -778,25 +778,28 @@ theorem quadP_transport {m s : ℕ} {z g g' : Fin m → Fin s → ℝ}
             (quadCvec z g' u' v' h))) :=
         add_le_add hU (mul_le_mul_of_nonneg_left hCx (by norm_num))
     _ ≤ cU * quadU z g u v h + cD * quadD z u v h +
-          2 * μₓ * ((1 + δ) * ((quadCvec z g u v h) ⬝ᵥ
+          2 * (μₓ * ((1 + δ) * ((quadCvec z g u v h) ⬝ᵥ
               (quadCvec z g u v h)) +
             (1 + δ⁻¹) * ((quadCvec z g' u' v' h - quadCvec z g u v h) ⬝ᵥ
-              (quadCvec z g' u' v' h - quadCvec z g u v h))) := by
-        exact add_le_add_left
-          (mul_le_mul_of_nonneg_left hnorm
-            (mul_nonneg (by norm_num) hμ.le)) _
+              (quadCvec z g' u' v' h - quadCvec z g u v h)))) := by
+        exact add_le_add le_rfl
+          (mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left hnorm hμ.le)
+            (by norm_num : (0:ℝ) ≤ 2))
     _ ≤ cU * quadU z g u v h + cD * quadD z u v h +
-          2 * μₓ * ((1 + δ) * (lam₀⁻¹ * ((quadCvec z g u v h) ⬝ᵥ
+          2 * (μₓ * ((1 + δ) * (lam₀⁻¹ * ((quadCvec z g u v h) ⬝ᵥ
               (R₀ *ᵥ (quadCvec z g u v h)))) +
             (1 + δ⁻¹) * ((1 + δ') * Λ * ce ^ 2 * quadU z g u v h +
-              (1 + δ'⁻¹) * Λ * cd * (8 * a ^ 2) * quadD z u v h)) := by
-        apply add_le_add_left
-        exact mul_le_mul_of_nonneg_left
-          (add_le_add
-            (mul_le_mul_of_nonneg_left hC0' (by linarith))
-            (mul_le_mul_of_nonneg_left hsub
-              (by have : (0:ℝ) ≤ δ⁻¹ := inv_nonneg.mpr hδ.le; linarith)))
-          (mul_nonneg (by norm_num) hμ.le)
+              (1 + δ'⁻¹) * Λ * cd * (8 * a ^ 2) * quadD z u v h))) := by
+        exact add_le_add le_rfl
+          (mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left
+              (add_le_add
+                (mul_le_mul_of_nonneg_left hC0' (by linarith))
+                (mul_le_mul_of_nonneg_left hsub
+                  (by have : (0:ℝ) ≤ δ⁻¹ := inv_nonneg.mpr hδ.le; linarith)))
+              hμ.le)
+            (by norm_num : (0:ℝ) ≤ 2))
     _ = (cU + 2 * μₓ * (1 + δ⁻¹) * (1 + δ') * Λ * ce ^ 2) *
             quadU z g u v h +
           μₓ * lam₀⁻¹ * (1 + δ) * (2 * ((quadCvec z g u v h) ⬝ᵥ
@@ -853,7 +856,7 @@ theorem quadP_transport_subspace {m s : ℕ}
     {R₀ Rₓ : Matrix (Fin s) (Fin s) ℝ} {E : Submodule ℝ (Fin s → ℝ)}
     {ρ γU γQ ε δ : ℝ}
     (hρ1 : ρ ≤ 1)
-    (hγU : 0 ≤ γU) (hγQ : 0 ≤ γQ)
+    (hγU : 0 ≤ γU) (_hγQ : 0 ≤ γQ)
     (hu : ∀ i, u i ≤ 0) (hz : ∀ i j, 0 ≤ z i j)
     (hR₀ : R₀.PosSemidef)
     (hE : ∀ h ∈ E,
@@ -907,8 +910,7 @@ diagonal lower bound close the `1−ρ/2` margin on `E`. -/
 theorem transported_subspace_bound_quad {m s : ℕ} {θ ρ γU γQ ε δ : ℝ}
     {z g g' : Fin m → Fin s → ℝ} {u u' : Fin m → ℝ} {v v' : Fin s → ℝ}
     {R₀ Rₓ : Matrix (Fin s) (Fin s) ℝ}
-    (hR : R₀.PosSemidef) (hθ : 0 ≤ θ) (hρ0 : 0 ≤ ρ) (hρ1 : ρ ≤ 1)
-    (hδ : δ ≤ 1)
+    (hR : R₀.PosSemidef) (hθ : 0 ≤ θ) (hρ1 : ρ ≤ 1)
     (hz : ∀ i j, 0 ≤ z i j) (hu : ∀ i, u i ≤ 0)
     (hQD : ∀ j, Pmat z g u v R₀ j j ≤
       θ * ((1 - ρ) • Dmat z u v) j j)
@@ -926,6 +928,109 @@ theorem transported_subspace_bound_quad {m s : ℕ} {θ ρ γU γQ ε δ : ℝ}
   obtain ⟨E, hEdim, hE⟩ :=
     exists_subspace_quadP_le hR hθ hρ1 hz hu hQD
   exact ⟨E, hEdim,
-    quadP_transport_subspace hρ1 hγU hγQ hu hz hR hE hPt hDl hc⟩
+    quadP_transport_subspace hρ1 hγU hγQ hu hz hR hE
+      (fun h _ => hPt h) (fun h _ => hDl h) hc⟩
+
+/-- `U[h] ≤ P[h]` whenever `R ⪰ 0`: the `2·(Ch)ᵀR(Ch)` term is nonnegative.
+This is the `U₀ ≤ P₀` step of the (B.9) triangle inequality. -/
+theorem quadU_le_quadP {m s : ℕ} {z g : Fin m → Fin s → ℝ} {u : Fin m → ℝ}
+    {v h : Fin s → ℝ} {R : Matrix (Fin s) (Fin s) ℝ}
+    (hR : R.PosSemidef) :
+    quadU z g u v h ≤ quadP z g u v h R := by
+  have hnn0 : 0 ≤ star (quadCvec z g u v h) ⬝ᵥ
+      (R *ᵥ quadCvec z g u v h) := hR.dotProduct_mulVec_nonneg _
+  rw [star_trivial] at hnn0
+  unfold quadP
+  linarith [hnn0]
+
+/-! ## The additive anchor-error variant (B.11)
+
+The paper's Appendix B also covers the case where the anchor subspace bound
+holds only up to an additive error: `P₀[h] ≤ (1−ρ)·D₀[h] + ξ‖h‖²` on `Ẽ`.
+Padding `D` by `(2ξ/ρ)·I` restores the margin —
+`P₀[h] ≤ (1−ρ/2)·D̂₀[h]` with `D̂₀[h] = D₀[h] + (2ξ/ρ)·‖h‖²` — and repeating
+the stability argument with margin `ρ/2` gives the (B.11) curvature bound
+`hᵀ∇²F h ≤ −(ρ/4)·Dₓ[h] + (2ξ/ρ)·‖h‖²`.  These are the quadratic-form
+algebra steps; `D̂ₓ ⪰ Dₓ` is immediate from `ξ ≥ 0`. -/
+
+/-- **Padding restores the margin.**  If `P[h] ≤ (1−ρ)·D[h] + ξ·‖h‖²` with
+`D[h] ≥ 0`, `0 < ρ ≤ 1`, `ξ ≥ 0`, then
+`P[h] ≤ (1−ρ/2)·(D[h] + (2ξ/ρ)·‖h‖²)`. -/
+theorem quadP_le_padded_quadD {m s : ℕ} {ρ ξ : ℝ}
+    {z : Fin m → Fin s → ℝ} {g : Fin m → Fin s → ℝ} {u : Fin m → ℝ}
+    {v : Fin s → ℝ} {R : Matrix (Fin s) (Fin s) ℝ}
+    (hρ : 0 < ρ) (hρ1 : ρ ≤ 1) (hξ : 0 ≤ ξ)
+    (hz : ∀ i j, 0 ≤ z i j) (hu : ∀ i, u i ≤ 0)
+    (h : Fin s → ℝ)
+    (hPD : quadP z g u v h R ≤
+      (1 - ρ) * quadD z u v h + ξ * (h ⬝ᵥ h)) :
+    quadP z g u v h R ≤
+      (1 - ρ / 2) * (quadD z u v h + (2 * ξ / ρ) * (h ⬝ᵥ h)) := by
+  have hD : 0 ≤ quadD z u v h := quadD_nonneg hz hu
+  have hnn : 0 ≤ h ⬝ᵥ h := Finset.sum_nonneg fun i _ => mul_self_nonneg _
+  have h1 : 0 ≤ (ρ / 2) * quadD z u v h := mul_nonneg (by linarith) hD
+  have hcoeff : 0 ≤ 2 * ξ * (1 - ρ) / ρ :=
+    div_nonneg (mul_nonneg (mul_nonneg (by norm_num) hξ) (by linarith)) hρ.le
+  have h2 : 0 ≤ (2 * ξ * (1 - ρ) / ρ) * (h ⬝ᵥ h) := mul_nonneg hcoeff hnn
+  have key : (1 - ρ / 2) * (quadD z u v h + (2 * ξ / ρ) * (h ⬝ᵥ h)) -
+      ((1 - ρ) * quadD z u v h + ξ * (h ⬝ᵥ h)) =
+      (ρ / 2) * quadD z u v h + (2 * ξ * (1 - ρ) / ρ) * (h ⬝ᵥ h) := by
+    have hρ' := hρ.ne'
+    field_simp
+    ring
+  have hdiff : (1 - ρ) * quadD z u v h + ξ * (h ⬝ᵥ h) ≤
+      (1 - ρ / 2) * (quadD z u v h + (2 * ξ / ρ) * (h ⬝ᵥ h)) :=
+    sub_nonneg.mp (key ▸ add_nonneg h1 h2)
+  linarith [hPD, hdiff]
+
+/-- **The (B.11) curvature bound.**  If the transported bound holds against
+the padded `D̂ = D + (2ξ/ρ)·‖·‖²` at margin `ρ/4`, then
+`P[h] − D[h] ≤ −(ρ/4)·D[h] + (2ξ/ρ)·‖h‖²`. -/
+theorem quadP_sub_quadD_le_of_padded {m s : ℕ} {ρ ξ : ℝ}
+    {z : Fin m → Fin s → ℝ} {g : Fin m → Fin s → ℝ} {u : Fin m → ℝ}
+    {v : Fin s → ℝ} {R : Matrix (Fin s) (Fin s) ℝ}
+    (hρ : 0 < ρ) (hξ : 0 ≤ ξ) (h : Fin s → ℝ)
+    (hPD : quadP z g u v h R ≤
+      (1 - ρ / 4) * (quadD z u v h + (2 * ξ / ρ) * (h ⬝ᵥ h))) :
+    quadP z g u v h R - quadD z u v h ≤
+      -(ρ / 4) * quadD z u v h + (2 * ξ / ρ) * (h ⬝ᵥ h) := by
+  have hnn : 0 ≤ h ⬝ᵥ h := Finset.sum_nonneg fun i _ => mul_self_nonneg _
+  have hc : 0 ≤ 2 * ξ / ρ :=
+    div_nonneg (mul_nonneg (by norm_num) hξ) hρ.le
+  have h2 : 0 ≤ (2 * ξ / ρ) * (h ⬝ᵥ h) := mul_nonneg hc hnn
+  have hle : (1 - ρ / 4) * ((2 * ξ / ρ) * (h ⬝ᵥ h)) ≤
+      (2 * ξ / ρ) * (h ⬝ᵥ h) := by
+    calc (1 - ρ / 4) * ((2 * ξ / ρ) * (h ⬝ᵥ h))
+        ≤ 1 * ((2 * ξ / ρ) * (h ⬝ᵥ h)) :=
+          mul_le_mul_of_nonneg_right (by linarith) h2
+      _ = (2 * ξ / ρ) * (h ⬝ᵥ h) := one_mul _
+  nlinarith [hPD, hle]
+
+/-- **(B.11) at the Hessian level.**  The matrix-level curvature expression
+satisfies `hᵀ∇²F_b h ≤ −(ρ/4)·Dₓ[h] + (2ξ/ρ)·‖h‖²` under the padded
+transported bound. -/
+theorem curvature_lhs_le_of_padded_bound {m s : ℕ} (b : ℝ)
+    {M : Matrix (Fin s) (Fin s) ℝ} (hM : M.IsSymm)
+    {z g : Fin m → Fin s → ℝ} {u : Fin m → ℝ} {h : Fin s → ℝ}
+    {ρ ξ : ℝ} (hρ : 0 < ρ) (hξ : 0 ≤ ξ)
+    (hPD : quadP z g u ((slackMatrix b M)⁻¹ *ᵥ fun _ => 1) h
+        (slackMatrix b M)⁻¹ ≤
+      (1 - ρ / 4) * (quadD z u ((slackMatrix b M)⁻¹ *ᵥ fun _ => 1) h +
+        (2 * ξ / ρ) * (h ⬝ᵥ h))) :
+    2 * ∑ p : Fin s, ∑ q : Fin s,
+        ((slackMatrix b M)⁻¹ *
+          batchMatrixDeriv z u (fun i => g i ⬝ᵥ h) *
+          (slackMatrix b M)⁻¹ *
+          batchMatrixDeriv z u (fun i => g i ⬝ᵥ h) *
+          (slackMatrix b M)⁻¹) p q +
+      ∑ p : Fin s, ∑ q : Fin s,
+        ((slackMatrix b M)⁻¹ *
+          batchMatrixDeriv2Gen z u (fun i => g i ⬝ᵥ h)
+            (fun i => -(2 * (4 * barrierQuad (z i) h))) *
+          (slackMatrix b M)⁻¹) p q ≤
+      -(ρ / 4) * quadD z u ((slackMatrix b M)⁻¹ *ᵥ fun _ => 1) h +
+        (2 * ξ / ρ) * (h ⬝ᵥ h) := by
+  rw [curvature_lhs_eq_quadP_sub_quadD b hM z g u h]
+  exact quadP_sub_quadD_le_of_padded hρ hξ h hPD
 
 end Komlos
